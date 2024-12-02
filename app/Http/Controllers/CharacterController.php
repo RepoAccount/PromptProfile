@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Character;
+use App\Models\World;
 use Illuminate\Http\Request;
 
 class CharacterController extends Controller
@@ -9,8 +11,15 @@ class CharacterController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
+        return view('characters.index'); // placeholder
         // $characters = Character::with('worlds')->get();
         // return view('characters.index', compact('characters')); TODO: UI
     }
