@@ -2,6 +2,7 @@
 
 @section('header_title', 'Register')
 @section('content')
+    <!DOCTYPE html>
     <div class="register-container">
         <form method="POST" action="{{ route('register') }}">
             @csrf

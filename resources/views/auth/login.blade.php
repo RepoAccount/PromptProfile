@@ -2,6 +2,7 @@
 
 @section('header_title', 'Log In')
 @section('content')
+    <!DOCTYPE html>
     <div class="login-container">
         <form method="POST" action="{{ route('login') }}" novalidate>
         @csrf

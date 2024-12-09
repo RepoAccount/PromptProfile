@@ -19,9 +19,8 @@ class CharacterController extends Controller
 
     public function index()
     {
-        return view('characters.index'); // placeholder
-        // $characters = Character::with('worlds')->get();
-        // return view('characters.index', compact('characters')); TODO: UI
+        $characters = auth()->user()->characters()->with('images')->get();
+        return view('characters.index', compact('characters'));
     }
 
     /**
@@ -29,7 +28,7 @@ class CharacterController extends Controller
      */
     public function create()
     {
-        // return view('characters.create'); TODO: UI
+        //
     }
 
     /**
@@ -39,17 +38,10 @@ class CharacterController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|max:255',
-            'main_prompt' => 'required',
-            'writing_prompt' => 'nullable',
-            'misc_prompt' => 'nullable',
         ]);
 
         $character = auth()->user()->characters()->create($validatedData);
-        if ($request->has('worlds')) {
-            $character->worlds()->attach($request->worlds);
-        }
-
-        return redirect()->route('characters.index');
+        return response()->json(['success' => true, 'id' => $character->id]);
     }
 
     /**
@@ -57,7 +49,9 @@ class CharacterController extends Controller
      */
     public function show(Character $character)
     {
-        // return view('characters.show', compact('character')); TODO:UI
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
     }
 
     /**
@@ -65,6 +59,7 @@ class CharacterController extends Controller
      */
     public function edit(Character $character)
     {
+        // ??? TODO: UI
         $worlds = World::all();
         return view('characters.edit', compact('character', 'worlds'));
     }

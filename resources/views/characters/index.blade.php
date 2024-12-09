@@ -13,67 +13,29 @@
 </head>
 <body>
 <main>
-    <aside class="sidebar left-sidebar">
-        <a href="{{ route('home') }}" class="general-button" id="back-button">Go Back</a>
-    </aside>
-
-    <div class="characters-container">
-        <div class="character">
-            <!-- <a href="profile.html"> -->
-                <img src="{{ asset('img/placeholder.jpg') }}" alt="Character 1">
-                <p>Character 1</p>
-            <!-- </a> -->
-        </div>
-        <div class="character">
-            <!-- <a href="profile.html"> -->
-                <img src="{{ asset('img/placeholder2.jpg') }}" alt="Character 2">
-                <p>Character 2</p>
-            <!-- </a> -->
-        </div>
-        <div class="character">
-            <!-- <a href="profile.html"> -->
-                <img src="{{ asset('img/placeholder.jpg') }}" alt="Character 3">
-                <p>Character 3</p>
-            <!-- </a> -->
-        </div>
-        <div class="character">
-            <!-- <a href="profile.html"> -->
-                <img src="{{ asset('img/placeholder2.jpg') }}" alt="Character 4">
-                <p>Character 4</p>
-            <!-- </a> -->
-        </div>
-        <div class="character">
-            <!-- <a href="profile.html"> -->
-                <img src="{{ asset('img/placeholder.jpg') }}" alt="Character 5">
-                <p>Character 5</p>
-            <!-- </a> -->
-        </div>
-        <div class="character">
-            <!-- <a href="profile.html"> -->
-                <img src="{{ asset('img/placeholder2.jpg') }}" alt="Character 6">
-                <p>Character 6</p>
-            <!-- </a> -->
-        </div>
-        <div class="character">
-            <!-- <a href="profile.html"> -->
-                <img src="{{ asset('img/placeholder.jpg') }}" alt="Character 7">
-                <p>Character 7</p>
-            <!-- </a> -->
-        </div>
-        <div class="character">
-            <!-- <a href="profile.html"> -->
-                <img src="{{ asset('img/placeholder2.jpg') }}" alt="Character 8">
-                <p>Character 8</p>
-            <!-- </a> -->
-        </div>
-        <div class="character">
-            <!-- <a href="profile.html"> -->
-                <img src="{{ asset('img/placeholder.jpg') }}" alt="Character 9">
-                <p>Character 9</p>
-            <!-- </a> -->
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>Input character name</h2>
+            <input type="text" id="characterName" placeholder="Character Name">
+            <p id="validationError"></p>
+            <button class="general-button" id="submitCharacter">Create</button>
         </div>
     </div>
-
+    <aside class="sidebar left-sidebar">
+        <a href="{{ route('home') }}" class="general-button dark-button">Go Back</a>
+        <button id="createCharacterBtn" class="general-button dark-button">Add New</button>
+    </aside>
+    <div class="characters-container">
+        @foreach($characters as $character)
+            <div class="character">
+                <a href="{{ route('characters.show', $character->id) }}">
+                    <img src="{{ $character->images->first() ? asset($character->images->first()->file_path) : asset('img/placeholder.jpg') }}" alt="{{ $character->name }}">
+                    <p>{{ $character->name }}</p>
+                </a>
+            </div>
+        @endforeach
+    </div>
     <aside class="sidebar right-sidebar">
         <div class="filter-section">
             <p>Select World</p>
@@ -82,8 +44,8 @@
             <div class="filter-option">World 3</div>
         </div>
     </aside>
-
 </main>
+@vite('resources/js/characterCreation.ts')
 </body>
 </html>
 @endsection
