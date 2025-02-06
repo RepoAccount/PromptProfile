@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Character;
+use App\Models\CharacterSegment;
 use Illuminate\Http\Request;
 
 class CharacterSegmentController extends Controller
@@ -9,9 +11,22 @@ class CharacterSegmentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Character $character)
     {
-        //
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $backstory = $character->segments()->where('segment_type', 'backstory')->orderBy('order')->get();
+        $relationships = $character->segments()->where('segment_type', 'relationships')->orderBy('order')->get();
+        $personality = $character->segments()->where('segment_type', 'personality')->orderBy('order')->get();
+
+        return view('characters.segments', [
+            'character' => $character,
+            'backstory' => $backstory,
+            'relationships' => $relationships,
+            'personality' => $personality
+        ]);
     }
 
     /**
@@ -25,19 +40,18 @@ class CharacterSegmentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Character $character)
     {
-        $validatedData = $request->validate([
-            'character_id' => 'required|exists:characters,id',
-            'segment_type' => 'required|string',
-            'title' => 'required|string',
-            'content' => 'required|string',
-            'scene_trigger' => 'nullable|string',
-            'order' => 'required|integer',
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $segment = $character->segments()->create([
+            'segment_type' => $request->type,
+            'content' => ''
         ]);
 
-        $segment = CharacterSegment::create($validatedData);
-        return response()->json($segment, 201);
+        return response()->json($segment);
     }
 
     /**
@@ -59,26 +73,54 @@ class CharacterSegmentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, CharacterSegment $characterSegment)
+    public function update(Request $request, Character $character, CharacterSegment $segment)
     {
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         $validatedData = $request->validate([
-            'segment_type' => 'required|string',
-            'title' => 'required|string',
-            'content' => 'required|string',
-            'scene_trigger' => 'nullable|string',
-            'order' => 'required|integer',
+            'order' => 'required|integer|min:0'
         ]);
 
-        $characterSegment->update($validatedData);
-        return response()->json($characterSegment);
+        $segment->update([
+            'title' => $request->title,
+            'content' => $request->segment_content ?? '',
+            'scene_trigger' => $request->scene_trigger,
+            'order' => $validatedData['order']
+        ]);
+
+        return response()->json($segment);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(CharacterSegment $characterSegment)
+    public function destroy(Character $character, CharacterSegment $segment)
     {
-        $characterSegment->delete();
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $segment->delete();
         return response()->json(null, 204);
     }
+
+    public function misc(Character $character)
+    {
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $segments = $character->segments()
+            ->where('segment_type', 'misc')
+            ->orderBy('order')
+            ->get();
+
+        return view('characters.misc', [
+            'character' => $character,
+            'segments' => $segments
+        ]);
+    }
+
 }

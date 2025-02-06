@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -51,4 +52,8 @@ class User extends Authenticatable
         return $this->hasMany(Character::class);
     }
 
+    public function worlds()
+    {
+        return $this->hasMany(World::class);
+    }
 }

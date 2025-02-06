@@ -11,19 +11,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('worlds', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->text('description');
-            $table->timestamps();
+        Schema::table('character_memories', function (Blueprint $table) {
+            $table->string('title')->after('character_id')->nullable();
         });
     }
 
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('worlds');
+        Schema::table('character_memories', function (Blueprint $table) {
+            $table->dropColumn('title');
+        });
     }
 };

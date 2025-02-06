@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Character;
+use App\Models\CharacterMemory;
 use Illuminate\Http\Request;
 
 class CharacterMemoryController extends Controller
@@ -9,9 +11,14 @@ class CharacterMemoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Character $character)
     {
-        //
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $memories = $character->memories()->orderBy('order')->get();
+        return view('characters.memories', compact('character', 'memories'));
     }
 
     /**
@@ -25,19 +32,21 @@ class CharacterMemoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Character $character)
     {
-        $validatedData = $request->validate([
-            'character_id' => 'required|exists:characters,id',
-            'context' => 'required|string',
-            'excerpt' => 'required|string',
-            'scene_trigger' => 'nullable|string',
-            'order' => 'required|integer',
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $memory = $character->memories()->create([
+            'title' => '',
+            'context' => '',
+            'excerpt' => ''
         ]);
 
-        $memory = CharacterMemory::create($validatedData);
-        return response()->json($memory, 201);
+        return response()->json($memory);
     }
+
 
     /**
      * Display the specified resource.
@@ -58,25 +67,33 @@ class CharacterMemoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, CharacterMemory $characterMemory)
+    public function update(Request $request, Character $character, CharacterMemory $memory)
     {
-        $validatedData = $request->validate([
-            'context' => 'required|string',
-            'excerpt' => 'required|string',
-            'scene_trigger' => 'nullable|string',
-            'order' => 'required|integer',
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $memory->update([
+            'title' => $request->title ?? '',
+            'context' => $request->context ?? '',
+            'excerpt' => $request->excerpt ?? '',
+            'scene_trigger' => $request->scene_trigger,
+            'order' => $request->order
         ]);
 
-        $characterMemory->update($validatedData);
-        return response()->json($characterMemory);
+        return response()->json($memory);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(CharacterMemory $characterMemory)
+    public function destroy(Character $character, CharacterMemory $memory)
     {
-        $characterMemory->delete();
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $memory->delete();
         return response()->json(null, 204);
     }
 }

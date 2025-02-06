@@ -9,6 +9,10 @@ export default defineConfig({
                 'resources/sass/app.scss',
                 'resources/js/app.js',
                 'resources/js/characterCreation.ts',
+                'resources/js/worlds.ts',
+                'resources/js/worldManager.ts',
+                'resources/js/basicInfo.ts',
+                'resources/js/gallery.ts'
             ],
             refresh: true,
         }),

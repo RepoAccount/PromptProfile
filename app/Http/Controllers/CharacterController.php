@@ -52,6 +52,20 @@ class CharacterController extends Controller
         if ($character->user_id !== auth()->id()) {
             abort(403);
         }
+
+        $character->load(['images', 'segments']);
+        $summary = $character->segments->where('segment_type', 'summary')->first()?->content ?? '';
+
+        return view('characters.show', compact('character', 'summary'));
+    }
+
+    public function gallery(Character $character)
+    {
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        return view('characters.gallery.index', compact('character'));
     }
 
     /**
@@ -59,8 +73,10 @@ class CharacterController extends Controller
      */
     public function edit(Character $character)
     {
-        // ??? TODO: UI
-        $worlds = World::all();
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+        $worlds = World::where('user_id', auth()->id())->get();
         return view('characters.edit', compact('character', 'worlds'));
     }
 
@@ -69,26 +85,118 @@ class CharacterController extends Controller
      */
     public function update(Request $request, Character $character)
     {
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         $validatedData = $request->validate([
             'name' => 'required|max:255',
-            'main_prompt' => 'required',
-            'writing_prompt' => 'nullable',
-            'misc_prompt' => 'nullable',
+            'summary' => 'nullable'
         ]);
 
-        $character->update($validatedData);
-        // $character->worlds()->sync($request->worlds); TODO: UI
+        $character->name = $validatedData['name'];
+        $character->save();
 
-        // return redirect()->route('characters.show', $character); TODO: UI
-        return response()->json($character);
+        if ($validatedData['summary']) {
+            $character->segments()->updateOrCreate(
+                ['segment_type' => 'summary'],
+                ['content' => $validatedData['summary']]
+            );
+        }
+
+        return response()->json([
+            'name' => $character->name,
+            'summary' => $validatedData['summary'] ?? ''
+        ]);
     }
+
+
+    public function getWorlds(Character $character)
+    {
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $current = $character->worlds;
+        $available = World::where('user_id', auth()->id())
+            ->whereNotIn('id', $character->worlds->pluck('id'))
+            ->get();
+
+        return response()->json([
+            'current' => $current,
+            'available' => $available
+        ]);
+    }
+
+    public function list()
+    {
+        $characters = auth()->user()->characters()
+            ->with(['images', 'profile_image'])
+            ->get()
+            ->map(function($character) {
+                return [
+                    'id' => $character->id,
+                    'name' => $character->name,
+                    'image' => $character->profile_image ? asset($character->profile_image->file_path) : null
+                ];
+            });
+
+        return response()->json($characters);
+    }
+
+    public function addWorld(Character $character, World $world)
+    {
+        if ($character->user_id !== auth()->id() || $world->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $character->worlds()->attach($world->id);
+        return response()->json(['success' => true]);
+    }
+
+    public function removeWorld(Character $character, World $world)
+    {
+        if ($character->user_id !== auth()->id() || $world->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $character->worlds()->detach($world->id);
+        return response()->json(['success' => true]);
+    }
+
+    public function prompts(Character $character)
+    {
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        return view('characters.prompts', compact('character'));
+    }
+
+    public function updatePrompts(Request $request, Character $character)
+    {
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $character->update([
+            'main_prompt' => $request->main_prompt,
+            'writing_prompt' => $request->writing_prompt,
+            'misc_prompt' => $request->misc_prompt
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Character $character)
     {
+        if ($character->user_id !== auth()->id()) {
+            abort(403);
+        }
         $character->delete();
-        // return redirect()->route('characters.index'); TODO: UI
         return response()->json(null, 204);
     }
 }

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('title')->nullable();
             $table->text('content');
             $table->string('scene_trigger')->nullable();
-            $table->integer('order');
+            $table->integer('order')->default(0);
             $table->timestamps();
         });
     }

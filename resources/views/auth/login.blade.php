@@ -26,9 +26,6 @@
             </div>
             <button type="submit" class="general-button">Login</button>
         </form>
-        @if (Route::has('password.request'))
-            <a href="{{ route('password.request') }}" class="forgot-password">Forgot Your Password?</a>
-        @endif
         <div class="register-link">
             Don't have an account? <a href="{{ route('register') }}">Register</a>
         </div>

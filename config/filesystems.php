@@ -35,6 +35,7 @@ return [
             'root' => storage_path('app/private'),
             'serve' => true,
             'throw' => false,
+            'upload_max_filesize' => env('UPLOAD_MAX_FILESIZE', '20M'),
         ],
 
         'public' => [
@@ -42,6 +43,7 @@ return [
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
+            'upload_max_filesize' => env('UPLOAD_MAX_FILESIZE', '20M'),
             'throw' => false,
         ],
 

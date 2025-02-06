@@ -13,6 +13,12 @@ window.onclick = (event) => {
     if (event.target == modal) modal.style.display = "none";
 }
 
+window.onpageshow = function(event) {
+    if (event.persisted || window.performance?.getEntriesByType('navigation')[0]?.type === 'back_forward') {
+        window.location.reload();
+    }
+};
+
 submitBtn.onclick = () => {
     const nameInput = (document.getElementById('characterName') as HTMLInputElement);
     if (nameInput.value.length === 0 || nameInput.value.length > 255) {
